@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AegisCard // Credit Card Fraud Detection Dashboard</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <i class="fa-solid fa-shield-halved app-logo-icon"></i>
+                <div class="title-wrapper">
+                    <h1>AEGIS<span>CARD</span></h1>
+                    <p class="subtitle">// AI Credit Card Fraud Screening & Model Benchmark</p>
+                </div>
+            </div>
+            <div class="header-status">
+                <span class="status-indicator online"></span>
+                <span class="status-text">ML Models Loaded</span>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <main class="dashboard-grid">
+            
+            <!-- Left Panel: Live Screener -->
+            <section class="grid-card screener-card">
+                <div class="card-header">
+                    <h2><i class="fa-solid fa-credit-card"></i> Transaction Screener</h2>
+                    <p>Enter details or choose a preloaded scenario template</p>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Template Presets -->
+                    <div class="form-group preset-group">
+                        <label for="preset-select"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Scenario Template</label>
+                        <select id="preset-select" class="form-control">
+                            <option value="" disabled selected>Select a preset scenario...</option>
+                            <option value="safe_grocery">Legitimate Grocery POS ($42.50, Local, Noon)</option>
+                            <option value="safe_online">Legitimate Online Streaming ($14.99, Netflix)</option>
+                            <option value="fraud_elec_midnight">Suspicious High-Value Electronics ($985.00, Distant, 3:00 AM)</option>
+                            <option value="fraud_shopping_diff_state">Out-of-State Retail Shopping ($650.00, High Distance)</option>
+                            <option value="safe_dining">Legitimate Dining POS ($85.20, Local, Evening)</option>
+                        </select>
+                    </div>
+
+                    <form id="screener-form">
+                        <!-- Model Selection for prediction display priority -->
+                        <div class="form-group model-selector-group">
+                            <label><i class="fa-solid fa-robot"></i> Selected Screening Model</label>
+                            <div class="model-pills">
+                                <label class="model-pill">
+                                    <input type="radio" name="active_model" value="random_forest" checked>
+                                    <span>Random Forest</span>
+                                </label>
+                                <label class="model-pill">
+                                    <input type="radio" name="active_model" value="decision_tree">
+                                    <span>Decision Tree</span>
+                                </label>
+                                <label class="model-pill">
+                                    <input type="radio" name="active_model" value="logistic_regression">
+                                    <span>Logistic Regression</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 2-Column Form Fields -->
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="amt">Amount ($)</label>
+                                <input type="number" id="amt" name="amt" class="form-control" placeholder="10.00" step="0.01" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="category">Category</label>
+                                <select id="category" name="category" class="form-control" required>
+                                    <!-- Options will be populated from models/categories.json dynamically -->
+                                    <option value="" disabled selected>Loading categories...</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="gender">Gender</label>
+                                <select id="gender" name="gender" class="form-control" required>
+                                    <option value="F">Female</option>
+                                    <option value="M">Male</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="dob">Cardholder Date of Birth</label>
+                                <input type="date" id="dob" name="dob" class="form-control" required>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="trans_date_trans_time">Transaction Date & Time</label>
+                                <input type="datetime-local" id="trans_date_trans_time" name="trans_date_trans_time" class="form-control" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="lat">Customer Latitude</label>
+                                <input type="number" id="lat" name="lat" class="form-control" placeholder="40.7128" step="0.0001" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="long">Customer Longitude</label>
+                                <input type="number" id="long" name="long" class="form-control" placeholder="-74.0060" step="0.0001" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="merch_lat">Merchant Latitude</label>
+                                <input type="number" id="merch_lat" name="merch_lat" class="form-control" placeholder="40.7300" step="0.0001" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="merch_long">Merchant Longitude</label>
+                                <input type="number" id="merch_long" name="merch_long" class="form-control" placeholder="-74.0100" step="0.0001" required>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="city_pop">City Population</label>
+                                <input type="number" id="city_pop" name="city_pop" class="form-control" placeholder="10000" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="submit-btn" id="submit-btn">
+                            <span class="btn-text"><i class="fa-solid fa-magnifying-glass"></i> Analyze Transaction</span>
+                            <div class="btn-loader hidden"><i class="fa-solid fa-spinner fa-spin"></i> Analyzing...</div>
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Center Panel: Results and Statistics -->
+            <div class="center-column">
+                
+                <!-- Results Card -->
+                <section class="grid-card results-card" id="results-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-bullseye"></i> Screening Decision</h2>
+                    </div>
+                    <div class="card-body result-placeholder-body" id="result-placeholder">
+                        <div class="placeholder-icon">
+                            <i class="fa-solid fa-fingerprint fa-beat"></i>
+                        </div>
+                        <h3>Awaiting Input</h3>
+                        <p>Configure a transaction and click "Analyze Transaction" to execute machine learning inference.</p>
+                    </div>
+                    <div class="card-body result-active-body hidden" id="result-content">
+                        <div class="decision-header">
+                            <div class="decision-verdict" id="verdict-badge">
+                                <i class="fa-solid fa-triangle-exclamation verdict-icon"></i>
+                                <span id="verdict-text">FRAUD DETECTED</span>
+                            </div>
+                            <div class="gauge-container">
+                                <div class="gauge-ring">
+                                    <svg viewBox="0 0 100 100">
+                                        <circle class="gauge-bg" cx="50" cy="50" r="45"></circle>
+                                        <circle class="gauge-fill" id="gauge-fill-circle" cx="50" cy="50" r="45"></circle>
+                                    </svg>
+                                    <div class="gauge-label">
+                                        <span class="percent-val" id="fraud-prob-val">94%</span>
+                                        <span class="percent-lbl">Fraud Prob</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Engineered Features Breakdown -->
+                        <div class="feature-metrics">
+                            <div class="metric-mini-card">
+                                <span class="metric-title">Calculated Distance</span>
+                                <span class="metric-value" id="calc-distance">24.5 km</span>
+                            </div>
+                            <div class="metric-mini-card">
+                                <span class="metric-title">Cardholder Age</span>
+                                <span class="metric-value" id="calc-age">45 years</span>
+                            </div>
+                            <div class="metric-mini-card">
+                                <span class="metric-title">Transaction Time</span>
+                                <span class="metric-value" id="calc-hour">03:00 AM</span>
+                            </div>
+                            <div class="metric-mini-card">
+                                <span class="metric-title">Day of Week</span>
+                                <span class="metric-value" id="calc-day">Saturday</span>
+                            </div>
+                        </div>
+
+                        <!-- Multi-Model Comparison Table -->
+                        <div class="model-probs-table">
+                            <h4>Cross-Model Evaluation</h4>
+                            <div class="prob-row">
+                                <span class="model-name">Random Forest (Selected)</span>
+                                <div class="prob-bar-wrapper">
+                                    <div class="prob-bar" id="bar-rf" style="width: 80%"></div>
+                                </div>
+                                <span class="prob-num" id="prob-val-rf">80.0%</span>
+                            </div>
+                            <div class="prob-row">
+                                <span class="model-name">Decision Tree</span>
+                                <div class="prob-bar-wrapper">
+                                    <div class="prob-bar" id="bar-dt" style="width: 45%"></div>
+                                </div>
+                                <span class="prob-num" id="prob-val-dt">45.0%</span>
+                            </div>
+                            <div class="prob-row">
+                                <span class="model-name">Logistic Regression</span>
+                                <div class="prob-bar-wrapper">
+                                    <div class="prob-bar" id="bar-lr" style="width: 12%"></div>
+                                </div>
+                                <span class="prob-num" id="prob-val-lr">12.0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Dataset Stats Grid -->
+                <section class="grid-card stats-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-chart-pie"></i> Dataset Overview</h2>
+                        <p>Simulated credit card transactions statistics (Kaggle)</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <span class="stat-number" id="stat-total-records">1,296,675</span>
+                                <span class="stat-label">Total Transactions</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-number" id="stat-fraud-rate">0.52%</span>
+                                <span class="stat-label">Overall Fraud Rate</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-number" id="stat-fraud-amt">$530.12</span>
+                                <span class="stat-label">Avg. Fraud Amount</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-number" id="stat-legit-amt">$67.24</span>
+                                <span class="stat-label">Avg. Legit Amount</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Panel: Analytics and Metrics -->
+            <section class="grid-card analytics-card">
+                <div class="card-header tab-header">
+                    <h2><i class="fa-solid fa-chart-column"></i> Analytics Benchmarking</h2>
+                    <div class="analytics-tabs">
+                        <button class="tab-btn active" data-tab="comparison-tab">Summary</button>
+                        <button class="tab-btn" data-tab="roc-tab">ROC Curves</button>
+                        <button class="tab-btn" data-tab="pr-tab">PR Curves</button>
+                        <button class="tab-btn" data-tab="importance-tab">Features</button>
+                    </div>
+                </div>
+
+                <div class="card-body tab-content-container">
+                    <!-- Tab 1: Comparison -->
+                    <div class="tab-content active" id="comparison-tab">
+                        <div class="chart-container">
+                            <canvas id="comparisonChart"></canvas>
+                        </div>
+                        <div class="analytics-notes">
+                            <p><i class="fa-solid fa-circle-info"></i> <strong>Key Takeaway:</strong> F1-Score and Recall are crucial because credit card fraud datasets are extremely imbalanced. Accuracy is misleadingly high (e.g. 99%+) for all models.</p>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: ROC Curves -->
+                    <div class="tab-content" id="roc-tab">
+                        <div class="chart-container">
+                            <canvas id="rocChart"></canvas>
+                        </div>
+                        <div class="analytics-notes">
+                            <p><i class="fa-solid fa-circle-info"></i> <strong>Receiver Operating Characteristic:</strong> Random Forest and Decision Tree exhibit high Area Under Curve (AUC-ROC), indicating excellent discriminative capacity.</p>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: PR Curves -->
+                    <div class="tab-content" id="pr-tab">
+                        <div class="chart-container">
+                            <canvas id="prChart"></canvas>
+                        </div>
+                        <div class="analytics-notes">
+                            <p><i class="fa-solid fa-circle-info"></i> <strong>Precision-Recall Curve:</strong> More indicative than ROC for highly imbalanced data. Note how the Random Forest retains high Precision even at elevated Recall thresholds.</p>
+                        </div>
+                    </div>
+
+                    <!-- Tab 4: Feature Importance -->
+                    <div class="tab-content" id="importance-tab">
+                        <div class="chart-container">
+                            <canvas id="importanceChart"></canvas>
+                        </div>
+                        <div class="analytics-notes">
+                            <p><i class="fa-solid fa-circle-info"></i> Shows the top 10 features driving predictions for the selected model. Features like transaction amount (`amt`) and merchant-to-cardholder distance (`distance_km`) typically dominate.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Main JS file -->
+    <script src="app.js"></script>
+</body>
+</html>
